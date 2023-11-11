@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
+import 'package:food_allergy_detection_app_v1/admin_ops/admin_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -17,7 +18,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      home: const MyHomePage(title: 'Food Allergy Detection'),
     );
   }
 }
@@ -32,6 +33,10 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  String adminPassword =
+      "admin123"; // Change this to your desired admin password
+  String enteredPassword = "";
+
   String _scanBarcodeResult = '';
   bool isDiabetic = false; // Default value
   bool isCancerPatient = false; // Default value
@@ -240,7 +245,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   String getRecommendationText() {
-    if (isDiabetic && productindatabase) {
+    if (productindatabase) {
       if (shouldAvoidProduct) {
         return "It is better to avoid this product.";
       } else {
@@ -252,12 +257,72 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 
+  void _showAdminPasswordDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Enter Admin Password'),
+          content: TextField(
+            onChanged: (value) {
+              enteredPassword = value;
+            },
+            obscureText: true,
+            decoration: InputDecoration(
+              labelText: 'Password',
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                if (enteredPassword == adminPassword) {
+                  Navigator.of(context).pop(); // Close the password dialog
+                  _navigateToAdminScreen();
+                } else {
+                  // Show an error message or handle incorrect password
+                  // You can add a state variable to display an error message in the dialog.
+                }
+              },
+              child: Text('Submit'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _navigateToAdminScreen() {
+    // Navigate to the admin screen
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => AdminScreen()),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: Text(widget.title),
+      ),
+      drawer: Drawer(
+        child: ListView(
+          children: <Widget>[
+            ListTile(
+              title: Text('Admin?'),
+              onTap: () {
+                _showAdminPasswordDialog();
+              },
+            ),
+          ],
+        ),
       ),
       body: Center(
         child: Column(

@@ -1,0 +1,16 @@
+CREATE TABLE product (
+    product_id INT PRIMARY KEY AUTO_INCREMENT,
+    product_barcode VARCHAR(255) NOT NULL,
+    product_name VARCHAR(255) NOT NULL,
+    sugar_content VARCHAR(50),
+    preservatives_content VARCHAR(50),
+    oils_content VARCHAR(50),
+    fats_content VARCHAR(50),
+    palm_oil BOOLEAN
+);
+
+CREATE TABLE added (
+    add_id INT PRIMARY KEY AUTO_INCREMENT,
+    add_barcode VARCHAR(255),
+    demand INT
+);
