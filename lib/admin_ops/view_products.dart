@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:food_allergy_detection_app_v1/admin_ops/class_product.dart';
 import 'package:mysql1/mysql1.dart';
+import 'package:food_allergy_detection_app_v1/admin_ops/class_product.dart';
 import 'package:food_allergy_detection_app_v1/constants.dart';
 
 class ViewProductScreen extends StatefulWidget {
@@ -23,9 +23,7 @@ class _ViewProductScreenState extends State<ViewProductScreen> {
     try {
       var results = await conn.query('SELECT * FROM product');
       setState(() {
-        // Check the type of the results
         if (results is Results) {
-          // Convert to List<Map<String, dynamic>>
           productList = results
               .toList()
               .map((ResultRow row) =>
@@ -44,7 +42,6 @@ class _ViewProductScreenState extends State<ViewProductScreen> {
 
   Future<void> _editProduct(int productId) async {
     // Implement the edit logic
-    // You can navigate to another screen for editing or show a dialog for editing
     // Example: Navigator.push(context, MaterialPageRoute(builder: (context) => EditProductScreen(productId)));
   }
 
@@ -63,52 +60,78 @@ class _ViewProductScreenState extends State<ViewProductScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return SingleChildScrollView(
       child: Padding(
         padding: const EdgeInsets.all(16.0),
-        child // Show a message if the list is empty
-            : ListView.builder(
-          shrinkWrap: true,
-          itemCount: productList.length,
-          itemBuilder: (context, index) {
-            final product = productList[index];
-            return Card(
-              child: ListTile(
-                title: Text(product['product_name']),
-                subtitle: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('Barcode: ${product['product_barcode']}'),
-                    Text('Sugar Content: ${product['sugar_content']}'),
-                    Text(
-                        'Preservatives Content: ${product['preservatives_content']}'),
-                    Text('Oils Content: ${product['oils_content']}'),
-                    Text('Fats Content: ${product['fats_content']}'),
-                    Text('Palm Oil: ${product['palm_oil']}'),
-                  ],
-                ),
-                trailing: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    IconButton(
-                      icon: Icon(Icons.edit),
-                      onPressed: () {
-                        _editProduct(product['product_id']);
-                      },
-                    ),
-                    IconButton(
-                      icon: Icon(Icons.delete),
-                      onPressed: () {
-                        _deleteProduct(product['product_id']);
-                      },
-                    ),
-                  ],
-                ),
+        child: productList.isEmpty
+            ? Text('No products available.')
+            : PaginatedDataTable(
+                columns: [
+                  DataColumn(label: Text('Product Name')),
+                  DataColumn(label: Text('Barcode')),
+                  DataColumn(label: Text('Sugar Content')),
+                  DataColumn(label: Text('Preservatives Content')),
+                  DataColumn(label: Text('Oils Content')),
+                  DataColumn(label: Text('Fats Content')),
+                  DataColumn(label: Text('Palm Oil')),
+                  DataColumn(label: Text('Actions')),
+                ],
+                rowsPerPage: 5,
+                source: MyDataTableSource(productList, _deleteProduct),
               ),
-            );
-          },
-        ),
       ),
     );
   }
+}
+
+class MyDataTableSource extends DataTableSource {
+  final List<Map<String, dynamic>> productList;
+  final Function(int) onDelete;
+
+  MyDataTableSource(this.productList, this.onDelete);
+
+  @override
+  DataRow getRow(int index) {
+    final product = productList[index];
+
+    return DataRow(
+      cells: [
+        DataCell(Text(product['product_name'])),
+        DataCell(Text(product['product_barcode'])),
+        DataCell(Text(product['sugar_content'].toString())),
+        DataCell(Text(product['preservatives_content'].toString())),
+        DataCell(Text(product['oils_content'].toString())),
+        DataCell(Text(product['fats_content'].toString())),
+        DataCell(Text(product['palm_oil'].toString())),
+        DataCell(
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // IconButton(
+              //   icon: Icon(Icons.edit),
+              //   onPressed: () {
+              //     _editProduct(product['product_id']);
+              //   },
+              // ),
+              IconButton(
+                icon: Icon(Icons.delete),
+                onPressed: () {
+                  onDelete(product['product_id']);
+                },
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  @override
+  bool get isRowCountApproximate => false;
+
+  @override
+  int get rowCount => productList.length;
+
+  @override
+  int get selectedRowCount => 0;
 }

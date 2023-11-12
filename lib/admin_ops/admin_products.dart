@@ -18,6 +18,8 @@ class _AdminProductScreenState extends State<AdminProductScreen> {
   final TextEditingController oilsController = TextEditingController();
   final TextEditingController fatsController = TextEditingController();
   bool palmOil = false;
+  String scannedBarcode = '';
+  GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   Future<void> _addProductToDatabase(BuildContext context) async {
     final MySqlConnection conn = await MySqlConnection.connect(settings);
@@ -36,23 +38,23 @@ class _AdminProductScreenState extends State<AdminProductScreen> {
         ],
       );
 
-      showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: Text('Success'),
-            content: Text('Product added successfully'),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-                child: Text('OK'),
-              ),
-            ],
-          );
-        },
-      );
+      // showDialog(
+      //   context: context,
+      //   builder: (BuildContext context) {
+      //     return AlertDialog(
+      //       title: Text('Success'),
+      //       content: Text('Product added successfully'),
+      //       actions: [
+      //         TextButton(
+      //           onPressed: () {
+      //             Navigator.of(context).pop();
+      //           },
+      //           child: Text('OK'),
+      //         ),
+      //       ],
+      //     );
+      //   },
+      // );
     } catch (e) {
       showDialog(
         context: context,
@@ -77,74 +79,73 @@ class _AdminProductScreenState extends State<AdminProductScreen> {
   }
 
   Future<void> _showAddProductDialog(BuildContext context) async {
-    return showDialog(
+    await FlutterBarcodeScanner.scanBarcode(
+      "#ff6666",
+      "Cancel",
+      true,
+      ScanMode.BARCODE,
+    ).then((value) {
+      setState(() {
+        scannedBarcode = value;
+        barcodeController.text = scannedBarcode;
+      });
+    });
+
+    showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
           title: Text('Add Product'),
           content: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                ElevatedButton(
-                  onPressed: () async {
-                    // Barcode scanning code
-                    String barcodeScanResult;
-                    try {
-                      barcodeScanResult =
-                          await FlutterBarcodeScanner.scanBarcode(
-                        "#ff6666",
-                        "Cancel",
-                        true,
-                        ScanMode.BARCODE,
-                      );
-                    } on PlatformException {
-                      barcodeScanResult = "Failed to get platform version";
-                    }
-
-                    setState(() {
-                      barcodeController.text = barcodeScanResult;
-                    });
-                  },
-                  child: Text('Scan Barcode'),
-                ),
-                SizedBox(height: 16),
-                Text('Scanned Barcode: ${barcodeController.text}'),
-                TextField(
-                  controller: nameController,
-                  decoration: InputDecoration(labelText: 'Product Name'),
-                ),
-                TextField(
-                  controller: sugarController,
-                  decoration: InputDecoration(labelText: 'Sugar Content'),
-                ),
-                TextField(
-                  controller: preservativesController,
-                  decoration:
-                      InputDecoration(labelText: 'Preservatives Content'),
-                ),
-                TextField(
-                  controller: oilsController,
-                  decoration: InputDecoration(labelText: 'Oils Content'),
-                ),
-                TextField(
-                  controller: fatsController,
-                  decoration: InputDecoration(labelText: 'Fats Content'),
-                ),
-                Row(
-                  children: [
-                    Text('Palm Oil:'),
-                    Checkbox(
-                      value: palmOil,
-                      onChanged: (value) {
-                        setState(() {
-                          palmOil = value!;
-                        });
-                      },
-                    ),
-                  ],
-                ),
-              ],
+            child: Form(
+              key: _formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  ElevatedButton(
+                    onPressed: () {
+                      _startBarcodeScanning();
+                    },
+                    child: Text('Scan Barcode'),
+                  ),
+                  SizedBox(height: 16),
+                  Text('Scanned Barcode: ${barcodeController.text}'),
+                  TextField(
+                    controller: nameController,
+                    decoration: InputDecoration(labelText: 'Product Name'),
+                  ),
+                  TextField(
+                    controller: sugarController,
+                    decoration: InputDecoration(labelText: 'Sugar Content'),
+                  ),
+                  TextField(
+                    controller: preservativesController,
+                    decoration:
+                        InputDecoration(labelText: 'Preservatives Content'),
+                  ),
+                  TextField(
+                    controller: oilsController,
+                    decoration: InputDecoration(labelText: 'Oils Content'),
+                  ),
+                  TextField(
+                    controller: fatsController,
+                    decoration: InputDecoration(labelText: 'Fats Content'),
+                  ),
+                  Row(
+                    children: [
+                      Text('Palm Oil:'),
+                      Checkbox(
+                        value: palmOil,
+                        onChanged: (value) {
+                          setState(() {
+                            palmOil = value!;
+                          });
+                        },
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
           ),
           actions: [
@@ -156,8 +157,10 @@ class _AdminProductScreenState extends State<AdminProductScreen> {
             ),
             TextButton(
               onPressed: () {
-                _addProductToDatabase(context); // Perform database insertion
-                Navigator.of(context).pop(); // Close the dialog
+                if (_formKey.currentState!.validate()) {
+                  _addProductToDatabase(context); // Perform database insertion
+                  Navigator.of(context).pop(); // Close the dialog
+                }
               },
               child: Text('Add Product'),
             ),
@@ -165,6 +168,24 @@ class _AdminProductScreenState extends State<AdminProductScreen> {
         );
       },
     );
+  }
+
+  void _startBarcodeScanning() async {
+    String barcodeScanResult;
+    try {
+      barcodeScanResult = await FlutterBarcodeScanner.scanBarcode(
+        "#ff6666",
+        "Cancel",
+        true,
+        ScanMode.BARCODE,
+      );
+    } on PlatformException {
+      barcodeScanResult = "Failed to get platform version";
+    }
+
+    setState(() {
+      scannedBarcode = barcodeScanResult;
+    });
   }
 
   @override
