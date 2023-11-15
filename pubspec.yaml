@@ -41,6 +41,7 @@ dependencies:
   intl: ^0.18.1
   curved_navigation_bar: ^1.0.3
   fl_chart: ^0.64.0
+  flutter_barcode_scanner: ^2.0.0
 
 dev_dependencies:
   flutter_test:

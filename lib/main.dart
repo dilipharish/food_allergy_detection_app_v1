@@ -240,7 +240,7 @@ class _MyHomePageState extends State<MyHomePage> {
       bool palmOil = productDetails['palm_oil'] == 1;
 
       setState(() {
-        _productName = productDetails['product_name'];
+        _productName = productDetails['product_name'] ?? 'No product ';
         _scanBarcodeResult = barcodeScanRes;
         productInDatabase = true;
       });
@@ -383,7 +383,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   String getRecommendationText() {
-    if (productInDatabase) {
+    if (_productName != 'No product ') {
       if (shouldAvoidProduct) {
         return "It is better to avoid $_productName.";
       } else {
@@ -477,16 +477,16 @@ class _MyHomePageState extends State<MyHomePage> {
               SizedBox(height: 20),
               ElevatedButton(
                 onPressed: _showCancerQuestionDialog,
-                child: Text("Do you have cancer?"),
+                child: Text("Are you susceptible to cancer?"),
               ),
-              Text("Has Cancer: ${isCancerPatient ? 'Yes' : 'No'}"),
+              Text(" Cancer: ${isCancerPatient ? 'Yes' : 'No'}"),
               SizedBox(height: 20),
               ElevatedButton(
                 onPressed: _showBloodPressureQuestionDialog,
-                child: Text("Do you have high blood pressure?"),
+                child: Text("Are you susceptible to high blood pressure?"),
               ),
               Text(
-                  "Has high blood pressure: ${hasHighBloodPressure ? 'Yes' : 'No'}"),
+                  " High blood pressure: ${hasHighBloodPressure ? 'Yes' : 'No'}"),
               SizedBox(height: 20),
               ElevatedButton(
                 onPressed: scanBarcode,
