@@ -181,18 +181,21 @@ class _MyHomePageState extends State<MyHomePage> {
 
   void _handleDiabeticStatus(bool isDiabetic) {
     // Perform actions based on the user's diabetic status.
-    if (isDiabetic) {
-      // If the user is diabetic, you can display a message or take other actions.
-      // For example, show a message to be cautious about high-sugar products.
-      setState(() {
-        shouldAvoidProduct = true;
-      });
-    } else {
-      // If the user is not diabetic, you can reset any previous warnings or actions.
-      setState(() {
-        shouldAvoidProduct = false;
-      });
-    }
+    // if (isDiabetic) {
+    //   // If the user is diabetic, you can display a message or take other actions.
+    //   // For example, show a message to be cautious about high-sugar products.
+    //   setState(() {
+    //     shouldAvoidProduct = true;
+    //   });
+    // } else {
+    //   // If the user is not diabetic, you can reset any previous warnings or actions.
+    //   setState(() {
+    //     shouldAvoidProduct = false;
+    //   });
+    // }
+    setState(() {
+      this.isDiabetic = isDiabetic;
+    });
   }
 
   void _handleCancerStatus(bool isCancerPatient) {
@@ -228,9 +231,12 @@ class _MyHomePageState extends State<MyHomePage> {
     if (productDetails != null) {
       double sugarContent =
           double.tryParse(productDetails['sugar_content'] ?? '0.0') ?? 0.0;
-      String preservativesContent = productDetails['preservatives_content'];
-      String oilsContent = productDetails['oils_content'];
-      String fatsContent = productDetails['fats_content'];
+      bool preservativesContent =
+          productDetails['preservatives_content'] != '0';
+      double oilsContent =
+          double.tryParse(productDetails['oils_content'] ?? '0.0') ?? 0.0;
+      double fatsContent =
+          double.tryParse(productDetails['fats_content'] ?? '0.0') ?? 0.0;
       bool palmOil = productDetails['palm_oil'] == 1;
 
       setState(() {
@@ -247,38 +253,34 @@ class _MyHomePageState extends State<MyHomePage> {
       print("Fats Content: $fatsContent");
       print("Palm Oil: $palmOil");
 
-      // Check for diabetic condition
-      if (isDiabetic) {
-        if (sugarContent > 30.0) {
-          setState(() {
-            shouldAvoidProduct = true;
-          });
-        }
-      } else if (isCancerPatient) {
-        // Check for cancer patient condition
-        if (preservativesContent != '0') {
-          setState(() {
-            shouldAvoidProduct = true;
-          });
-        }
-      } else if (hasHighBloodPressure) {
-        // Check for high blood pressure condition
-        if (double.parse(oilsContent) > 10.0 ||
-            double.parse(fatsContent) > 20.0) {
-          setState(() {
-            shouldAvoidProduct = true;
-          });
-        }
-      } else if (palmOil) {
-        // Check for palm oil
-        setState(() {
-          shouldAvoidProduct = true;
-        });
-      } else {
-        setState(() {
-          shouldAvoidProduct = false;
-        });
+      // Check conditions
+      // Check conditions
+      bool avoidProduct = false;
+
+// // Check for diabetic condition
+      if (isDiabetic && sugarContent > 30.0) {
+        avoidProduct = true;
       }
+
+// Check for cancer patient condition
+      if (isCancerPatient && preservativesContent) {
+        avoidProduct = true;
+      }
+      print("The Condition is Cancerous ");
+      print(hasHighBloodPressure && (oilsContent > 10.0 || fatsContent > 20.0));
+// Check for high blood pressure condition
+      if (hasHighBloodPressure && (oilsContent > 10.0 || fatsContent > 20.0)) {
+        avoidProduct = true;
+      }
+
+// Check for palm oil
+      if (palmOil) {
+        avoidProduct = true;
+      }
+
+      setState(() {
+        shouldAvoidProduct = avoidProduct;
+      });
     } else {
       setState(() {
         productInDatabase = false;

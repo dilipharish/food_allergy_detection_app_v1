@@ -1,0 +1,3 @@
+if user has diabetic sugar_content must be below 30, if user has cancer there should be preservatives_content, 
+if user has blood pressure the oil_content should be less than 10, and fats_content should be below 20,
+in product there should be no palm_oil content then only we can say product is safer to use .
