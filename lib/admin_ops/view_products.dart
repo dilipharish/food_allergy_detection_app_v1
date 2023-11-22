@@ -74,6 +74,8 @@ class _ViewProductScreenState extends State<ViewProductScreen> {
                   DataColumn(label: Text('Oils Content')),
                   DataColumn(label: Text('Fats Content')),
                   DataColumn(label: Text('Palm Oil')),
+                  DataColumn(label: Text('Salt Content')),
+                  DataColumn(label: Text('Other Allergy')),
                   DataColumn(label: Text('Actions')),
                 ],
                 rowsPerPage: 5,
@@ -103,6 +105,8 @@ class MyDataTableSource extends DataTableSource {
         DataCell(Text(product['oils_content'].toString())),
         DataCell(Text(product['fats_content'].toString())),
         DataCell(Text(product['palm_oil'].toString())),
+        DataCell(Text(product['salt_content'].toString())),
+        DataCell(Text(product['otherallergy'].toString())),
         DataCell(
           Row(
             mainAxisSize: MainAxisSize.min,

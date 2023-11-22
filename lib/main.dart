@@ -46,6 +46,10 @@ class _MyHomePageState extends State<MyHomePage> {
   bool hasHighBloodPressure = false; // Default value
   bool shouldAvoidProduct = false; // Default value
   bool productIndatabase = true;
+  bool avoidProduct = false;
+  String reason = "";
+  String reason1 = "";
+  String other = "";
 
   void _showDiabetesQuestionDialog() {
     showDialog(
@@ -96,7 +100,7 @@ class _MyHomePageState extends State<MyHomePage> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Do you have cancer?'),
+          title: Text('Are You Susceptible cancer?'),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
@@ -140,7 +144,7 @@ class _MyHomePageState extends State<MyHomePage> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Do you have high blood pressure?'),
+          title: Text('Are You Susceptible high blood pressure?'),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
@@ -231,6 +235,8 @@ class _MyHomePageState extends State<MyHomePage> {
     if (productDetails != null) {
       double sugarContent =
           double.tryParse(productDetails['sugar_content'] ?? '0.0') ?? 0.0;
+      double salt_content =
+          double.tryParse(productDetails['salt_content'] ?? '0.0') ?? 0.0;
       bool preservativesContent =
           productDetails['preservatives_content'] != '0';
       double oilsContent =
@@ -243,8 +249,9 @@ class _MyHomePageState extends State<MyHomePage> {
         _productName = productDetails['product_name'] ?? 'No product ';
         _scanBarcodeResult = barcodeScanRes;
         productInDatabase = true;
+        other = productDetails['otherallergy'] ?? 'No Other Allergy products';
       });
-
+      reason1 = '';
       // Use the details as needed
       print("Product Name: $_productName");
       print("Sugar Content: $sugarContent");
@@ -252,34 +259,58 @@ class _MyHomePageState extends State<MyHomePage> {
       print("Oils Content: $oilsContent");
       print("Fats Content: $fatsContent");
       print("Palm Oil: $palmOil");
+      print("Salt Content:$salt_content");
 
       // Check conditions
       // Check conditions
-      bool avoidProduct = false;
+      avoidProduct = false;
 
 // // Check for diabetic condition
       if (isDiabetic && sugarContent > 30.0) {
         avoidProduct = true;
+        reason1 += "SugarContent";
       }
 
 // Check for cancer patient condition
       if (isCancerPatient && preservativesContent) {
         avoidProduct = true;
+        reason1 += " Preservatives";
       }
       print("The Condition is Cancerous ");
       print(hasHighBloodPressure && (oilsContent > 10.0 || fatsContent > 20.0));
+
+      int content = 0;
 // Check for high blood pressure condition
-      if (hasHighBloodPressure && (oilsContent > 10.0 || fatsContent > 20.0)) {
-        avoidProduct = true;
+      if (hasHighBloodPressure) {
+        if (oilsContent > 10.0) {
+          content = content + 1;
+          reason1 += " OilsContent ";
+          avoidProduct = true;
+        }
+        if (fatsContent > 20.0) {
+          content = content + 1;
+          reason1 += " FatsContent ";
+          avoidProduct = true;
+        }
+        if (salt_content > 0.4) {
+          content = content + 1;
+          reason1 += " SaltContent ";
+          avoidProduct = true;
+        }
+        // if (content > 0) {
+        //   avoidProduct = true;
+        // }
       }
 
 // Check for palm oil
       if (palmOil) {
         avoidProduct = true;
+        reason1 += " Palm Oil Content";
       }
 
       setState(() {
         shouldAvoidProduct = avoidProduct;
+        reason = reason1;
       });
     } else {
       setState(() {
@@ -385,9 +416,17 @@ class _MyHomePageState extends State<MyHomePage> {
   String getRecommendationText() {
     if (_productName != 'No product ') {
       if (shouldAvoidProduct) {
-        return "It is better to avoid $_productName.";
+        if (other == 'No Other Allergy products') {
+          return "Based on your Health Condition It is better to avoid $_productName due to high amounts of $reason1 \n ------------------------\n No other Allergy Products Found ";
+        } else {
+          return "Based on your Health Condition It is better to avoid $_productName due to high amounts of $reason1 \n ------------------------\n $other are the other Allergy Ingredtients Detected in $_productName please avoid if you are allergic to these . ";
+        }
       } else {
-        return "It is good to use $_productName.";
+        if (other == 'No Other Allergy products') {
+          return "Based on your Health Condition It is good to use $_productName  \n ------------------------\n No other Allergy Products Found";
+        } else {
+          return "Based on your Health Condition It is good to use $_productName \n ------------------------\n $other are the other Allergy Ingredtients Detected in $_productName please avoid if you are allergic to these";
+        }
       }
     } else {
       return "product not found in database";

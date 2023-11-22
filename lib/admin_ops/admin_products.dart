@@ -17,6 +17,9 @@ class _AdminProductScreenState extends State<AdminProductScreen> {
   final TextEditingController preservativesController = TextEditingController();
   final TextEditingController oilsController = TextEditingController();
   final TextEditingController fatsController = TextEditingController();
+  final TextEditingController saltController = TextEditingController();
+  final TextEditingController otherController = TextEditingController();
+
   bool palmOil = false;
   String scannedBarcode = '';
   GlobalKey<FormState> _formKey = GlobalKey<FormState>();
@@ -26,7 +29,7 @@ class _AdminProductScreenState extends State<AdminProductScreen> {
 
     try {
       await conn.query(
-        'INSERT INTO product (product_barcode, product_name, sugar_content, preservatives_content, oils_content, fats_content, palm_oil) VALUES (?, ?, ?, ?, ?, ?, ?)',
+        'INSERT INTO product (product_barcode, product_name, sugar_content, preservatives_content, oils_content, fats_content, palm_oil,salt_content,otherallergy) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
         [
           barcodeController.text,
           nameController.text,
@@ -35,6 +38,8 @@ class _AdminProductScreenState extends State<AdminProductScreen> {
           oilsController.text,
           fatsController.text,
           palmOil,
+          saltController.text,
+          otherController.text
         ],
       );
 
@@ -144,6 +149,15 @@ class _AdminProductScreenState extends State<AdminProductScreen> {
                       ),
                     ],
                   ),
+                  TextField(
+                    controller: saltController,
+                    decoration: InputDecoration(labelText: 'Salts Content'),
+                  ),
+                  TextField(
+                    controller: otherController,
+                    decoration:
+                        InputDecoration(labelText: 'Other Allergy Content'),
+                  ),
                 ],
               ),
             ),
@@ -190,7 +204,7 @@ class _AdminProductScreenState extends State<AdminProductScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return SingleChildScrollView(
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
